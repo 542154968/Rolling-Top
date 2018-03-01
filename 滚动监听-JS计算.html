@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>滚动监听</title>
+    <style>
+        ul,
+        body {
+            margin: 0
+        }
+
+        li {
+            width: 200px;
+            height: 500px;
+            background: red;
+
+        }
+
+        li.active {
+            background: green;
+        }
+
+        .title {
+            position: relative;
+            z-index: 2;
+            background: yellow;
+            transition: transform 0.2s linear;
+            -webkit-transform: translateZ(0);
+            -moz-transform: translateZ(0);
+            -ms-transform: translateZ(0);
+            -o-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            -moz-backface-visibility: hidden;
+            -ms-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+
+        .title.active {
+            background: black
+        }
+    </style>
+</head>
+
+<body>
+    <ul>
+        <li>
+            <div class="title">
+                我是标题1
+            </div>
+            <p>内容1</p>
+            <p>内容1</p>
+            <p>内容1</p>
+            <p>内容1</p>
+            <p>内容1</p>
+            <p>内容1</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题2
+            </div>
+            <p>内容2</p>
+            <p>内容2</p>
+            <p>内容2</p>
+            <p>内容2</p>
+            <p>内容2</p>
+            <p>内容2</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题3
+            </div>
+            <p>内容3</p>
+            <p>内容3</p>
+            <p>内容3</p>
+            <p>内容3</p>
+            <p>内容3</p>
+            <p>内容3</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题4
+            </div>
+            <p>内容4</p>
+            <p>内容4</p>
+            <p>内容4</p>
+            <p>内容4</p>
+            <p>内容4</p>
+            <p>内容4</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题5
+            </div>
+            <p>内容5</p>
+            <p>内容5</p>
+            <p>内容5</p>
+            <p>内容5</p>
+            <p>内容5</p>
+            <p>内容5</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题6
+            </div>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题7
+            </div>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题8
+            </div>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题9
+            </div>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+        </li>
+        <li>
+            <div class="title">
+                我是标题10
+            </div>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+            <p>内容</p>
+        </li>
+    </ul>
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script>
+        function ListenScroll(option) {
+            if (!(this instanceof ListenScroll)) {
+                return new ListenScroll();
+            }
+            var defaults = {
+                el: 'li'
+            }
+            this.result = $.extend(true, defaults, option);
+            // 每个li
+            this.$el = null;
+            // 每个li的范围   offsetTop 和 自身高度 + offsetTop
+            this.topArr = [];
+            this._init();
+        }
+        ListenScroll.prototype = {
+            constructor: ListenScroll,
+            _init: function () {
+                this._getTopRange();
+                this._scroll();
+            },
+            _getTopRange: function () {
+                var $el = $(this.result.el),
+                    arr = [];
+                this.$el = $el;
+                for (var i = 0, l = $el.length; i < l; i++) {
+                    var item = $el.eq(i);
+                    arr.push(item.offset().top)
+                    arr.push(item.height() + item.offset().top)
+                    this.topArr.push(arr)
+                    arr = [];
+                }
+            },
+            _scroll: function () {
+                var _this = this;
+                $(window).scroll(function () {
+                    var scrollY = this.scrollY,
+                        topArr = _this.topArr;
+                    for (var i = 0, l = topArr.length; i < l; i++) {
+                        var item = topArr[i];
+                        if (item[0] <= scrollY && item[1] >= scrollY) {
+                            _this._fixed(_this.$el.eq(i), scrollY, topArr[i][0]);
+                            break;
+                        }
+                    }
+                })
+            },
+            // 当前的li  当前滚动距离  当前的li的距离顶部距离   
+            _fixed: function ($el, scrollY, top) {
+                // console.log( $title.siblings() )
+                var $title = $el.find('.title');
+                $('.title').css('transform', 'translate( 0, 0 )')
+                $title.css('transform', 'translate( 0, ' + (scrollY - top) + 'px )')
+
+                // $title.addClass('active').siblings().find( 'title' ).removeClass('active').css('transform', 'translate( 0, 0 )');
+            }
+        }
+        ListenScroll();
+    </script>
+</body>
+
+</html>
